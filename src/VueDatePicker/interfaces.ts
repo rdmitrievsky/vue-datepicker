@@ -28,6 +28,19 @@ export interface DateFilter {
     times: { hours: number[]; minutes: number[]; seconds: number[] };
 }
 
+export interface ListData {
+    from: { [key: string]: number };
+    to: { [key: string]: number };
+    txt: string;
+    range: number;
+    sectionEnd?: boolean;
+}
+
+export interface DynamicListData {
+    dynamic: boolean;
+    data: ListData[] | null;
+}
+
 export interface ICalendarDay {
     text: number | string;
     value: Date;
@@ -118,7 +131,7 @@ export type CustomAltPosition = (el: HTMLElement | null) => {
     transform?: string;
 };
 
-export type PresetRange = { label: string; range: Date[] | string[]; style?: Record<string, string>; slot?: string };
+export type PresetRange = { label: string; range?: Date[] | string[]; style?: Record<string, string>; slot?: string };
 
 export type Flow = 'month' | 'year' | 'calendar' | 'time' | 'minutes' | 'hours' | 'seconds';
 export type MenuChildCmp = 'timePicker' | 'monthYearInput' | 'calendar';

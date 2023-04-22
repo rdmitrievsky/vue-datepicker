@@ -19,9 +19,13 @@ import type {
     WeekStartNum,
     WeekStartStr,
     CustomAltPosition,
+    DynamicListData,
 } from '@/interfaces';
 
 export const AllProps = {
+    presetRangePickedName: { type: String, default: null },
+    presetRangesDynamic: { type: Object as PropType<DynamicListData>, default: { dynamic: false, data: null } },
+    qweqweqwe: { type: Function, default: null },
     multiCalendars: { type: [Boolean, Number, String] as PropType<boolean | number | string>, default: null },
     modelValue: { type: [String, Date, Array, Object, Number] as PropType<ModelValue>, default: null },
     modelType: { type: String as PropType<ModelType>, default: null },

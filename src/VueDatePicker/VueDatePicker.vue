@@ -28,11 +28,13 @@
                 :open-on-top="openOnTop"
                 v-bind="$props"
                 v-model:internal-model-value="internalModelValue"
+                :preset-range-picked-name="presetItemPicked"
                 @close-picker="closeMenu"
                 @select-date="selectDate"
                 @auto-apply="autoApplyValue"
                 @time-update="timeUpdate"
                 @flow-step="$emit('flow-step', $event)"
+                @preset-range-clicked="qwezxc($event)"
                 @update-month-year="$emit('update-month-year', $event)"
                 @invalid-select="$emit('invalid-select', internalModelValue)"
                 @invalid-fixed-range="$emit('invalid-fixed-range', $event)"
@@ -80,6 +82,7 @@
     import type { DynamicClass, MonthYearOpt, DatepickerMenuRef, DatepickerInputRef, ModelValue } from '@/interfaces';
 
     const emit = defineEmits([
+        'preset-range-clicked',
         'update:model-value',
         'text-submit',
         'closed',
@@ -108,6 +111,7 @@
     const inputRef = ref<DatepickerInputRef | null>(null);
     const isInputFocused = ref(false);
     const pickerWrapperRef = ref<HTMLElement | null>(null);
+    const presetItemPicked = ref();
 
     const { setMenuFocused, setShiftKey } = useState();
     const { clearArrowNav } = useArrowNavigation();
@@ -239,6 +243,11 @@
         emit('cleared');
         closeMenu();
     };
+
+    function qwezxc(e: string) {
+        presetItemPicked.value = e;
+        emit('preset-range-clicked', e);
+    }
 
     const validateBeforeEmit = () => {
         const date = internalModelValue.value;

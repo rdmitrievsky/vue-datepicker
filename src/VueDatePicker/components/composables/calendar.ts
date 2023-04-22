@@ -32,6 +32,7 @@ import type {
     TimeType,
     VueEmit,
     WeekStartNum,
+    ListData,
 } from '@/interfaces';
 import type { UnwrapRef, Ref } from 'vue';
 
@@ -502,6 +503,7 @@ export const useCalendar = (
      * Do a necessary formatting and assign value to internal
      */
     const selectDate = (day: UnwrapRef<ICalendarDay>, isNext = false): void => {
+        console.log('bbb');
         if (isDisabled(day.value) || (!day.current && props.hideOffsetDates)) return;
 
         if (props.weekPicker) return handleWeekPickerSelect(day);
@@ -644,6 +646,7 @@ export const useCalendar = (
 
     // Called on event when the time value is changed
     const updateTime = (value: number | number[], isHours = true, isSeconds = false) => {
+        console.log('q');
         const hoursCp = isHours ? value : time.hours;
         const minutesCp = !isHours && !isSeconds ? value : time.minutes;
         const secondsCp = isSeconds ? value : time.seconds;
@@ -725,10 +728,28 @@ export const useCalendar = (
     };
 
     // Called when the preset range is clicked
-    const presetDateRange = (dates: Date[] | string[], hasSlot?: boolean): void => {
+    const presetDateRange = (hasSlot?: boolean, preset?: string, dates?: Date[] | string[]): void => {
         if (hasSlot) return;
-        if (dates.length && dates.length <= 2 && props.range) {
-            modelValue.value = dates.map((date) => getDate(date));
+        console.log(props);
+        if (props.presetRangesDynamic.dynamic) {
+            if (preset && props.presetRangesDynamic.data) {
+                const pickedPreset = props.presetRangesDynamic.data.find((i: ListData) => i.txt == preset);
+                if (!pickedPreset) return;
+                const renewdPreset = props.qweqweqwe(preset, props);
+                if (!renewdPreset) return;
+                const mdv = [renewdPreset.startDate, renewdPreset.endDate];
+                modelValue.value = mdv;
+                selectOnAutoApply();
+                if (props.multiCalendars) {
+                    nextTick().then(() => mapInternalModuleValues(true));
+                }
+            }
+            emit('preset-range-clicked', preset);
+        }
+        if (dates) {
+            if (dates.length && dates.length <= 2 && props.range) {
+                modelValue.value = dates.map((date) => getDate(date));
+            }
             selectOnAutoApply();
             if (props.multiCalendars) {
                 nextTick().then(() => mapInternalModuleValues(true));

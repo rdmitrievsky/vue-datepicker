@@ -9,10 +9,10 @@
             @mouseleave="clearHoverDate"
             @click="handleDpMenuClick"
             @keydown.esc="handleEsc"
-            @keydown.left.prevent="handleArrowKey('left')"
-            @keydown.up.prevent="handleArrowKey('up')"
-            @keydown.down.prevent="handleArrowKey('down')"
-            @keydown.right.prevent="handleArrowKey('right')"
+            @keydown.left="handleArrowKey('left', $event)"
+            @keydown.up="handleArrowKey('up', $event)"
+            @keydown.down="handleArrowKey('down', $event)"
+            @keydown.right="handleArrowKey('right', $event)"
             @keydown="checkShiftKey"
         >
             <div :class="disabledReadonlyOverlay" v-if="(disabled || readonly) && inline"></div>
@@ -27,24 +27,30 @@
                     <slot name="left-sidebar" v-bind="{ handleMonthYearChange }" />
                 </div>
                 <div class="dp__preset_ranges" v-if="presetRanges?.length">
-                    <div
-                        v-for="(preset, i) in presetRanges"
-                        :key="i"
-                        :style="preset.style || {}"
-                        class="dp__preset_range"
-                        @click="presetDateRange(preset.range, !!preset.slot)"
-                    >
-                        <template v-if="preset.slot">
-                            <slot
-                                :name="preset.slot"
-                                :preset-date-range="presetDateRange"
-                                :label="preset.label"
-                                :range="preset.range"
-                            />
-                        </template>
-                        <template v-else>
-                            {{ preset.label }}
-                        </template>
+                    <div class="dp__preset_ranges__wrapper">
+                        <div
+                            v-for="(preset, i) in presetRanges"
+                            :key="i"
+                            :style="preset.style || {}"
+                            :class="{ dp__preset_range__active: currentPresetItem == i }"
+                            class="dp__preset_range"
+                            @click="
+                                presetDateRange(!!preset.slot, preset.label, preset.range);
+                                currentPresetItem = i;
+                            "
+                        >
+                            <template v-if="preset.slot">
+                                <slot
+                                    :name="preset.slot"
+                                    :preset-date-range="presetDateRange"
+                                    :label="preset.label"
+                                    :range="preset.range"
+                                />
+                            </template>
+                            <template v-else>
+                                {{ preset.label }}
+                            </template>
+                        </div>
                     </div>
                 </div>
                 <div class="dp__instance_calendar" ref="calendarWrapperRef" role="document">
@@ -88,7 +94,10 @@
                                 :year="year(instance)"
                                 v-bind="$props"
                                 v-model:flow-step="flowStep"
-                                @select-date="selectDate($event, !isFirstInstance(instance))"
+                                @select-date="
+                                    selectDate($event, !isFirstInstance(instance));
+                                    currentPresetItem = -1;
+                                "
                                 @handle-space="handleSpace($event, !isFirstInstance(instance))"
                                 @set-hover-date="setHoverDate($event)"
                                 @handle-scroll="handleScroll($event, instance)"
@@ -118,9 +127,18 @@
                                 :internal-model-value="internalModelValue"
                                 v-bind="$props"
                                 @mount="childMount('timePicker')"
-                                @update:hours="updateTime($event)"
-                                @update:minutes="updateTime($event, false)"
-                                @update:seconds="updateTime($event, false, true)"
+                                @update:hours="
+                                    updateTime($event);
+                                    currentPresetItem = -1;
+                                "
+                                @update:minutes="
+                                    updateTime($event, false);
+                                    currentPresetItem = -1;
+                                "
+                                @update:seconds="
+                                    updateTime($event, false, true);
+                                    currentPresetItem = -1;
+                                "
                                 @reset-flow="resetFlow"
                                 @overlay-closed="focusMenu"
                                 @overlay-opened="$emit('time-picker-open', $event)"
@@ -133,7 +151,7 @@
                     </div>
                 </div>
                 <div class="dp__sidebar_right" v-if="$slots['right-sidebar']">
-                    <slot name="right-sidebar" v-bind="{ handleMonthYearChange }" />
+                    <slot name="right-sidebar" :value="$props.internalModelValue" v-bind="{ handleMonthYearChange }" />
                 </div>
                 <div class="dp__now_wrap" v-if="showNowButton">
                     <slot name="now-button" v-if="$slots['now-button']" :select-current-date="selectCurrentDate" />
@@ -193,6 +211,7 @@
     import type { ComputedRef, PropType, Ref, UnwrapRef } from 'vue';
 
     const emit = defineEmits([
+        'preset-range-clicked',
         'close-picker',
         'select-date',
         'auto-apply',
@@ -229,6 +248,7 @@
     const dpMenuRef = ref(null);
     const menuMount = ref(false);
     const flowStep = ref(0);
+    const currentPresetItem = ref();
 
     onMounted(() => {
         menuMount.value = true;
@@ -241,7 +261,7 @@
         if (menu) {
             const stopDefault = (event: Event) => {
                 if (
-                    !['action-row', 'time-picker', 'month-year'].some((slotName) =>
+                    !['action-row', 'time-picker', 'month-year', 'right-sidebar'].some((slotName) =>
                         Object.keys(slots).includes(slotName),
                     )
                 ) {
@@ -451,18 +471,26 @@
         }
     };
 
-    const handleArrowKey = (arrow: 'up' | 'down' | 'left' | 'right'): void => {
-        if (props.arrowNavigation) {
-            if (arrow === 'up') return arrowUp();
-            if (arrow === 'down') return arrowDown();
-            if (arrow === 'left') return arrowLeft();
-            if (arrow === 'right') return arrowRight();
+    const handleArrowKey = (arrow: 'up' | 'down' | 'left' | 'right', ev: Event): void => {
+        const sidebar_exist = ['left-sidebar', 'right-sidebar'].some((slotName) =>
+            Object.keys(slots).includes(slotName),
+        );
+        if (ev.target && (ev.target as HTMLElement).tagName === 'INPUT' && sidebar_exist) {
+            return;
         } else {
-            if (arrow === 'left' || arrow === 'up') {
-                handleArrow('left', 0, arrow === 'up');
+            if (props.arrowNavigation) {
+                if (arrow === 'up') return arrowUp();
+                if (arrow === 'down') return arrowDown();
+                if (arrow === 'left') return arrowLeft();
+                if (arrow === 'right') return arrowRight();
             } else {
-                handleArrow('right', 0, arrow === 'down');
+                if (arrow === 'left' || arrow === 'up') {
+                    handleArrow('left', 0, arrow === 'up');
+                } else {
+                    handleArrow('right', 0, arrow === 'down');
+                }
             }
+            ev.preventDefault();
         }
     };
 
