@@ -4,6 +4,9 @@
             v-model="selectedDate"
             placeholder="Select Date"
             range
+            six-weeks
+            locale="ru"
+            :format="formatqwe"
             :preset-ranges="presetRanges"
             :preset-ranges-dynamic="{ dynamic: true, data: LIST_DATA_PICKER }"
             @preset-range-clicked="bebebe"
@@ -13,7 +16,16 @@
             :partial-range="false"
         >
             <template #right-sidebar="{ value }">
-                <div v-for="i in value" :key="i">{{ i && format(i, "dd-MM-yyyy','HH:mm:ss.SSSxxx") }}</div>
+                <div v-for="i in value" :key="i">{{ i && format(i, "dd-MM-yyyy','HH:mm:ss") }}</div>
+            </template>
+            <template #action-row="{ closePicker, selectDate }">
+                <div class="action-row">
+                    <button class="select-button" @click="closePicker">Close</button>
+                    <button class="select-button" @click="selectDate">Select Date</button>
+                </div>
+            </template>
+            <template #clock-icon>
+                <span>time</span>
             </template>
         </Datepicker>
         <button @click="changePresetName('Прошлая неделя')">Прошлая неделя</button>
@@ -33,7 +45,7 @@
         sectionEnd?: boolean;
     }
     const isDateUp = ref('Прошлая неделя');
-    const selectedDate = ref();
+
     const selectedDate2 = ref();
     const presetRanges2 = ref([
         { label: 'Today', range: [new Date(), new Date()] },
@@ -50,6 +62,7 @@
     function setDate(e, q) {
         console.log(q);
         console.log(`DATA IS SET TO ${e}`);
+        isDateUp.value = q;
     }
     const LIST_DATA_PICKER: ListData[] = [
         { from: { daysFull: 1 }, to: { daysEnd: 1 }, txt: 'Вчера', range: 1 },
@@ -109,7 +122,10 @@
             }
             if (key === 'weeksFull') {
                 // currDate.getDay()
-                currDate.setDate(currDate.getDate() - Number(smth[key]) * 7 - (currDate.getDay() - 1));
+                const findDate = new Date();
+                findDate.setDate(currDate.getDate() - Number(smth[key]) * 7);
+                const findOutDay = findDate.getDay();
+                currDate.setDate(findDate.getDate() - (6 - findOutDay));
                 currDate.setHours(0, 0, 0, 0);
             }
             if (key === 'months') {
@@ -155,13 +171,45 @@
         endDate: Date;
     }
 
-    const renewDate = (dateName: string, props): GetDate | undefined => {
-        if (!props.presetRangesDynamic.data) return;
-        const DATE_RANGE = props.presetRangesDynamic.data.find((i: ListData) => i.txt === dateName);
-        if (DATE_RANGE) {
-            return findTimeOrDate(DATE_RANGE.from, DATE_RANGE.to);
+    const renewDate = (dateName: string, props?: any): GetDate | undefined => {
+        if (Array.isArray(props)) {
+            const FLATTED_LIST_DATA = props.reduce((acc, val) => acc.concat(val), []);
+            const DATE_RANGE = FLATTED_LIST_DATA.find((i: ListData) => i.txt === dateName);
+            if (DATE_RANGE) {
+                return findTimeOrDate(DATE_RANGE.from, DATE_RANGE.to);
+            }
+        } else {
+            if (props.presetRangesDynamic.data) {
+                const DATE_RANGE = props.presetRangesDynamic.data.find((i: ListData) => i.txt === dateName);
+                if (DATE_RANGE) {
+                    return findTimeOrDate(DATE_RANGE.from, DATE_RANGE.to);
+                }
+            }
         }
     };
+
+    // const selectedDate = ref(renewDate('Последние 7 дней', LIST_DATA_PICKER));
+
+    const start = renewDate('Вчера', LIST_DATA_PICKER)?.startDate;
+    const end = renewDate('Вчера', LIST_DATA_PICKER)?.endDate;
+    console.log(start, end);
+    const selectedDate = ref();
+    if (start && end) {
+        isDateUp.value = 'Вчера';
+        selectedDate.value = [start, end];
+    }
+
+    function formatqwe(date) {
+        console.log(date);
+        if (date.length < 2) return;
+        const one = (date[0] as Date).toLocaleString('ru-RU');
+        const two = (date[1] as Date).toLocaleString('ru-RU');
+        if (isDateUp.value && isDateUp.value != '') {
+            return isDateUp.value;
+        } else {
+            return `${one} - ${two}`;
+        }
+    }
 </script>
 
 <style lang="scss">

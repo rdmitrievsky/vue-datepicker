@@ -272,7 +272,7 @@
      */
     const selectDate = (): void => {
         if (checkBeforeEmit() && validateBeforeEmit()) {
-            emitModelValue(presetItemPicked.value);
+            emitModelValue(internalPresetName.value);
             closeMenu();
         } else {
             emit('invalid-select', internalModelValue.value);
