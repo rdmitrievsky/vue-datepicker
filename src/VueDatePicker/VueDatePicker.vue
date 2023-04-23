@@ -1,6 +1,7 @@
 <template>
     <div :class="wrapperClass" ref="pickerWrapperRef">
         <DatepickerInput
+            :data-qwe="internalPresetName"
             ref="inputRef"
             :is-menu-open="isOpen"
             v-model:input-value="inputValue"
@@ -28,7 +29,7 @@
                 :open-on-top="openOnTop"
                 v-bind="$props"
                 v-model:internal-model-value="internalModelValue"
-                :preset-range-picked-name="presetItemPicked"
+                v-model:internal-range-picked-name="internalPresetName"
                 @close-picker="closeMenu"
                 @select-date="selectDate"
                 @auto-apply="autoApplyValue"
@@ -118,6 +119,9 @@
     const { validateDate, isValidTime } = useUtils(props);
 
     onMounted(() => {
+        if (props.presetRangePickedName) {
+            internalPresetName.value = props.presetRangePickedName;
+        }
         parseExternalModelValue(props.modelValue);
         if (!props.inline) {
             const el = getScrollableParent(pickerWrapperRef.value);
@@ -162,6 +166,7 @@
     const {
         inputValue,
         internalModelValue,
+        internalPresetName,
         parseExternalModelValue,
         emitModelValue,
         formatInputValue,
@@ -246,7 +251,7 @@
 
     function qwezxc(e: string) {
         presetItemPicked.value = e;
-        emit('preset-range-clicked', e);
+        internalPresetName.value = e;
     }
 
     const validateBeforeEmit = () => {
@@ -267,7 +272,7 @@
      */
     const selectDate = (): void => {
         if (checkBeforeEmit() && validateBeforeEmit()) {
-            emitModelValue();
+            emitModelValue(presetItemPicked.value);
             closeMenu();
         } else {
             emit('invalid-select', internalModelValue.value);

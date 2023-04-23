@@ -503,7 +503,6 @@ export const useCalendar = (
      * Do a necessary formatting and assign value to internal
      */
     const selectDate = (day: UnwrapRef<ICalendarDay>, isNext = false): void => {
-        console.log('bbb');
         if (isDisabled(day.value) || (!day.current && props.hideOffsetDates)) return;
 
         if (props.weekPicker) return handleWeekPickerSelect(day);
@@ -646,7 +645,6 @@ export const useCalendar = (
 
     // Called on event when the time value is changed
     const updateTime = (value: number | number[], isHours = true, isSeconds = false) => {
-        console.log('q');
         const hoursCp = isHours ? value : time.hours;
         const minutesCp = !isHours && !isSeconds ? value : time.minutes;
         const secondsCp = isSeconds ? value : time.seconds;
@@ -730,7 +728,7 @@ export const useCalendar = (
     // Called when the preset range is clicked
     const presetDateRange = (hasSlot?: boolean, preset?: string, dates?: Date[] | string[]): void => {
         if (hasSlot) return;
-        console.log(props);
+
         if (props.presetRangesDynamic.dynamic) {
             if (preset && props.presetRangesDynamic.data) {
                 const pickedPreset = props.presetRangesDynamic.data.find((i: ListData) => i.txt == preset);
@@ -744,6 +742,7 @@ export const useCalendar = (
                     nextTick().then(() => mapInternalModuleValues(true));
                 }
             }
+            emit('update:internal-range-picked-name', preset);
             emit('preset-range-clicked', preset);
         }
         if (dates) {

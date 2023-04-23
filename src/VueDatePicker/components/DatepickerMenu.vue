@@ -32,12 +32,9 @@
                             v-for="(preset, i) in presetRanges"
                             :key="i"
                             :style="preset.style || {}"
-                            :class="{ dp__preset_range__active: currentPresetItem == i }"
+                            :class="{ dp__preset_range__active: props.internalRangePickedName == preset.label }"
                             class="dp__preset_range"
-                            @click="
-                                presetDateRange(!!preset.slot, preset.label, preset.range);
-                                currentPresetItem = i;
-                            "
+                            @click="presetDateRange(!!preset.slot, preset.label, preset.range)"
                         >
                             <template v-if="preset.slot">
                                 <slot
@@ -96,7 +93,7 @@
                                 v-model:flow-step="flowStep"
                                 @select-date="
                                     selectDate($event, !isFirstInstance(instance));
-                                    currentPresetItem = -1;
+                                    emit('update:internal-range-picked-name', '');
                                 "
                                 @handle-space="handleSpace($event, !isFirstInstance(instance))"
                                 @set-hover-date="setHoverDate($event)"
@@ -129,15 +126,15 @@
                                 @mount="childMount('timePicker')"
                                 @update:hours="
                                     updateTime($event);
-                                    currentPresetItem = -1;
+                                    emit('update:internal-range-picked-name', '');
                                 "
                                 @update:minutes="
                                     updateTime($event, false);
-                                    currentPresetItem = -1;
+                                    emit('update:internal-range-picked-name', '');
                                 "
                                 @update:seconds="
                                     updateTime($event, false, true);
-                                    currentPresetItem = -1;
+                                    emit('update:internal-range-picked-name', '');
                                 "
                                 @reset-flow="resetFlow"
                                 @overlay-closed="focusMenu"
@@ -211,6 +208,7 @@
     import type { ComputedRef, PropType, Ref, UnwrapRef } from 'vue';
 
     const emit = defineEmits([
+        'update:internal-range-picked-name',
         'preset-range-clicked',
         'close-picker',
         'select-date',
@@ -248,7 +246,6 @@
     const dpMenuRef = ref(null);
     const menuMount = ref(false);
     const flowStep = ref(0);
-    const currentPresetItem = ref();
 
     onMounted(() => {
         menuMount.value = true;

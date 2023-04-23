@@ -14,6 +14,7 @@ import type { Ref } from 'vue';
  */
 export const useExternalInternalMapper = (emit: VueEmit, props: AllPropsType, isInputFocused: Ref<boolean>) => {
     const internalModelValue = ref();
+    const internalPresetName = ref('');
     const {
         getZonedToUtc,
         getZonedDate,
@@ -267,8 +268,12 @@ export const useExternalInternalMapper = (emit: VueEmit, props: AllPropsType, is
         return getZonedToUtc(val);
     };
 
-    const emitValue = (value: ModelValue): void => {
-        emit('update:model-value', value);
+    const emitValue = (value: ModelValue, q?: string): void => {
+        if (q) {
+            emit('update:model-value', value, q);
+        } else {
+            emit('update:model-value', value);
+        }
     };
 
     /**
@@ -295,14 +300,18 @@ export const useExternalInternalMapper = (emit: VueEmit, props: AllPropsType, is
      * When date is selected, emit event to update modelValue on external,
      * and format input value
      */
-    const emitModelValue = (): void => {
+    const emitModelValue = (q?: string): void => {
         formatInputValue();
 
         if (props.monthPicker) return modeEmitter(getMonthVal);
         if (props.timePicker) return modeEmitter(getTimeVal);
         if (props.yearPicker) return modeEmitter(getYear);
         if (props.weekPicker) return emitValue(internalModelValue.value);
-        return emitValue(mapInternalDatesToExternal());
+        if (q) {
+            return emitValue(mapInternalDatesToExternal(), q);
+        } else {
+            return emitValue(mapInternalDatesToExternal());
+        }
     };
 
     // Check if there is any selection before emitting value, to prevent null setting
@@ -320,6 +329,7 @@ export const useExternalInternalMapper = (emit: VueEmit, props: AllPropsType, is
     return {
         inputValue,
         internalModelValue,
+        internalPresetName,
         checkBeforeEmit,
         parseExternalModelValue,
         formatInputValue,

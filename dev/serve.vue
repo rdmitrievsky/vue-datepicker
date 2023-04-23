@@ -7,6 +7,7 @@
             :preset-ranges="presetRanges"
             :preset-ranges-dynamic="{ dynamic: true, data: LIST_DATA_PICKER }"
             @preset-range-clicked="bebebe"
+            :preset-range-picked-name="isDateUp"
             :qweqweqwe="renewDate"
             @update:model-value="setDate"
             :partial-range="false"
@@ -15,12 +16,8 @@
                 <div v-for="i in value" :key="i">{{ i && format(i, "dd-MM-yyyy','HH:mm:ss.SSSxxx") }}</div>
             </template>
         </Datepicker>
-        <Datepicker v-model="selectedDate2" placeholder="Select Date" range :preset-ranges="presetRanges2">
-            <template #right-sidebar>
-                <div>1</div>
-                <div>2</div>
-            </template>
-        </Datepicker>
+        <button @click="changePresetName('Прошлая неделя')">Прошлая неделя</button>
+        <button @click="changePresetName('Сегодня')">Сегодня</button>
     </div>
 </template>
 
@@ -35,6 +32,7 @@
         range: number;
         sectionEnd?: boolean;
     }
+    const isDateUp = ref('Прошлая неделя');
     const selectedDate = ref();
     const selectedDate2 = ref();
     const presetRanges2 = ref([
@@ -46,8 +44,11 @@
         },
         { label: 'This year', range: [startOfYear(new Date()), new Date()] },
     ]);
-
-    function setDate(e) {
+    function changePresetName(q) {
+        isDateUp.value = q;
+    }
+    function setDate(e, q) {
+        console.log(q);
         console.log(`DATA IS SET TO ${e}`);
     }
     const LIST_DATA_PICKER: ListData[] = [

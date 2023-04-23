@@ -23,6 +23,7 @@ import type {
 } from '@/interfaces';
 
 export const AllProps = {
+    internalRangePickedName: { type: String, default: '' },
     presetRangePickedName: { type: String, default: null },
     presetRangesDynamic: { type: Object as PropType<DynamicListData>, default: { dynamic: false, data: null } },
     qweqweqwe: { type: Function, default: null },
