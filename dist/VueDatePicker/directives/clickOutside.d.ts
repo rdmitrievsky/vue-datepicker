@@ -1,0 +1,2 @@
+import type { MaybeElementRef, OnClickOutsideEvents, OnClickOutsideOptions } from '@/interfaces';
+export declare const onClickOutside: <E extends "click" | "mousedown" | "mouseup" | "touchstart" | "touchend" | "pointerdown" | "pointerup" = "pointerdown">(target: MaybeElementRef, inputRef: MaybeElementRef, handler: (evt: OnClickOutsideEvents[E]) => void, options?: OnClickOutsideOptions<E>) => (() => void) | undefined;

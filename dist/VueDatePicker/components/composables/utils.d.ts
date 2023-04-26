@@ -1,0 +1,34 @@
+import type { DateValue, Flow, TimeModel, InternalModuleValue, ICalendarDate } from '@/interfaces';
+import type { AllPropsType } from '@/utils/props';
+export declare const useUtils: (props: AllPropsType) => {
+    checkPartialRangeValue: () => Date;
+    checkRangeEnabled: <T>(fn: () => T) => T;
+    getZonedDate: (date: Date) => Date;
+    getZonedToUtc: (date: Date) => Date;
+    formatDate: (value: Date | Date[], customPattern?: string) => string;
+    getDefaultPattern: () => string;
+    validateDate: (date: Date) => boolean;
+    getDefaultStartTime: () => TimeModel | TimeModel[] | null;
+    isDisabled: (date: Date) => boolean;
+    isValidDate: (value: Date | Date[] | null) => boolean;
+    sanitizeDate: (date: Date | string) => Date | string;
+    getWeekFromDate: (date: Date) => [Date, Date];
+    matchDate: (date: Date, pattern: string[] | Date[] | number[] | ((date: Date) => boolean)) => boolean;
+    setDateMonthOrYear: (date: DateValue, month?: number | null, year?: number | null) => Date;
+    isValidTime: (date: InternalModuleValue) => boolean;
+    getCalendarDays: (month: number, year: number) => ICalendarDate[];
+    validateMonthYearInRange: (month: number, year: number, isNext: boolean, preventNav: boolean) => boolean;
+    validateMaxDate: (month: number, year: number) => boolean;
+    validateMinDate: (month: number, year: number) => boolean;
+    assignDefaultTime: (obj: TimeModel | Record<string, string | number>) => TimeModel;
+    defaults: import("vue").ComputedRef<{
+        ariaLabels: import("@/interfaces").AriaLabels;
+        textInputOptions: import("@/interfaces").TextInputOptions & Partial<import("@/interfaces").TextInputOptions>;
+        multiCalendars: number;
+        previewFormat: import("@/interfaces").IFormat;
+        filters: import("@/interfaces").DateFilter;
+        transitions: import("@/interfaces").Transition;
+        startTime: TimeModel | TimeModel[] | null;
+    }>;
+    hideNavigationButtons: import("vue").ComputedRef<(key: Flow) => boolean>;
+};
